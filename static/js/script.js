@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function() {
     let currentIndex = 0;
-    let posts = []; // Array to store fetched posts
+    let posts = [];
 
     function search() {
         let query = $('#query').val().trim();
@@ -15,8 +15,6 @@ document.addEventListener("DOMContentLoaded", function() {
         let include_videos = $('#include_videos').is(':checked');
         let include_galleries = $('#include_galleries').is(':checked');
 
-        console.log(`Query: ${query}, Sort by: ${sort_by}, Time filter: ${time_filter}, Include NSFW: ${include_nsfw}, Include Images: ${include_images}, Include Videos: ${include_videos}, Include Galleries: ${include_galleries}`);
-
         $.post('/scrape', {
             query: query,
             sort_by: sort_by,
@@ -26,7 +24,6 @@ document.addEventListener("DOMContentLoaded", function() {
             include_videos: include_videos,
             include_galleries: include_galleries
         }, function(data) {
-            console.log("Data received:", data); // Log the received data
             $('#results').empty();
             if (data.error) {
                 $('#results').append(`<div class="error">${data.error}</div>`);
@@ -36,7 +33,6 @@ document.addEventListener("DOMContentLoaded", function() {
             currentIndex = 0;
             displayPost(currentIndex);
         }).fail(function(jqXHR, textStatus, errorThrown) {
-            console.error("Error during AJAX request:", textStatus, errorThrown);
             $('#results').append(`<div class="error">Error: ${textStatus}</div>`);
         });
     }
@@ -48,15 +44,7 @@ document.addEventListener("DOMContentLoaded", function() {
         if (item.type === 'image') {
             content = `<img src="${item.url}" alt="${item.title}" class="media-element">`;
         } else if (item.type === 'video' || item.type === 'reddit_video' || item.url.endsWith('.mp4') || item.url.startsWith('blob:') || item.url.includes('v.redd.it')) {
-            if (item.audio_url) {
-                content = `
-                    <video controls class="media-element">
-                        <source src="${item.url}" type="video/mp4">
-                        <source src="${item.audio_url}" type="audio/mp4">
-                    </video>`;
-            } else {
-                content = `<video controls src="${item.url}" class="media-element"></video>`;
-            }
+            content = `<video controls src="${item.url}" class="media-element"></video>`;
         } else if (item.type === 'youtube') {
             const videoId = item.url.split('v=')[1]?.split('&')[0] || item.url.split('/')[3];
             const embedUrl = `https://www.youtube.com/embed/${videoId}`;
@@ -72,7 +60,7 @@ document.addEventListener("DOMContentLoaded", function() {
             content = `
                 <div class="gallery-container" data-current-index="0">
                     <div class="gallery">
-                        ${item.images.map((image, index) => `
+                        ${item.images.map((image) => `
                             <img src="${image}" alt="${item.title}" class="media-element gallery-image">
                         `).join('')}
                     </div>
@@ -81,7 +69,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 </div>
             `;
         } else if (item.type === 'link' && item.url.includes('reddit.com')) {
-            // Embed Reddit post directly for video blobs
             content = `<blockquote class="reddit-card"><a href="${item.url}">${item.title}</a></blockquote>`;
         } else {
             content = `<a href="${item.url}" target="_blank">${item.title}</a>`;
@@ -92,11 +79,9 @@ document.addEventListener("DOMContentLoaded", function() {
             $('#results').append(`<div class="item">${content}</div>`);
         }
 
-        // Ensure only the first image is displayed initially for galleries
         $('#results').find('.gallery-image').hide().first().show();
     }
 
-    // Function to move gallery images
     window.moveGallery = function(button, direction) {
         const galleryContainer = button.closest('.gallery-container');
         const gallery = galleryContainer.querySelector('.gallery');
@@ -133,7 +118,6 @@ document.addEventListener("DOMContentLoaded", function() {
             search();
         });
 
-        // Event listeners for navigation buttons
         $('#prevPostBtn').on('click', function() {
             navigatePosts(-1);
         });

@@ -8,10 +8,8 @@ from xml.etree import ElementTree as ET
 
 app = Flask(__name__)
 
-# Configure logging
 logging.basicConfig(level=logging.DEBUG)
 
-# Configure PRAW (Reddit API Wrapper)
 reddit = praw.Reddit(
     client_id='HfJQjgUcOq31Vc-_SqyVSg',
     client_secret='EU3hwPfOzpLqxIbw0af8A1qLkZEOCQ',
@@ -19,12 +17,10 @@ reddit = praw.Reddit(
 )
 
 def get_content_type(url):
-    logging.debug(f"Fetching content type for URL: {url}")
     try:
         response = requests.head(url, allow_redirects=True)
         content_type = response.headers.get('content-type')
         if content_type:
-            logging.debug(f"Content type: {content_type}, Status code: {response.status_code}")
             if 'image' in content_type:
                 return 'image'
             elif 'video' in content_type:
@@ -61,19 +57,6 @@ def fetch_dash_manifest(dash_url):
         logging.error(f"Error fetching DASH manifest: {e}")
         return None
 
-def get_audio_url_from_manifest(manifest):
-    try:
-        for period in manifest.findall('{urn:mpeg:dash:schema:mpd:2011}Period'):
-            for adaptation_set in period.findall('{urn:mpeg:dash:schema:mpd:2011}AdaptationSet'):
-                if adaptation_set.get('contentType') == 'audio':
-                    for representation in adaptation_set.findall('{urn:mpeg:dash:schema:mpd:2011}Representation'):
-                        base_url = representation.find('{urn:mpeg:dash:schema:mpd:2011}BaseURL').text
-                        if base_url:
-                            return base_url
-    except Exception as e:
-        logging.error(f"Error parsing DASH manifest: {e}")
-    return None
-
 def resolve_video_url(post):
     try:
         media = post.media
@@ -101,14 +84,11 @@ def index():
 @app.route('/scrape', methods=['POST'])
 def scrape():
     query = request.form['query'].strip()
-    logging.debug(f"Search query: {query}")
     sort_by = request.form.get('sort_by', 'relevance')
     time_filter = request.form.get('time_filter', 'all')
     include_nsfw = request.form.get('include_nsfw') == 'true'
 
     subreddit_name = 'all'
-    logging.debug(f"Searching subreddit: {subreddit_name}")
-
     desired_results = 11
     max_attempts = 5
 
@@ -116,7 +96,7 @@ def scrape():
     processed_urls = set()
     processed_ids = set()
     attempts = 0
-    after = None  # Initialize after parameter
+    after = None
 
     try:
         while len(results) < desired_results and attempts < max_attempts:
@@ -131,18 +111,11 @@ def scrape():
                 if post.id in processed_ids or post.url in processed_urls:
                     continue
 
-                logging.debug(f"Processing post: {post.title}, URL: {post.url}")
                 content_type = get_content_type(post.url)
 
                 if content_type in ['image', 'video', 'reddit_video', 'gallery']:
                     if content_type == 'reddit_video':
                         url = resolve_video_url(post)
-                        dash_url = get_dash_manifest_url(post)
-                        audio_url = None
-                        if dash_url:
-                            manifest = fetch_dash_manifest(dash_url)
-                            if manifest:
-                                audio_url = get_audio_url_from_manifest(manifest)
                         if url is None:
                             processed_ids.add(post.id)
                             continue
@@ -150,8 +123,7 @@ def scrape():
                             'title': post.title,
                             'url': url,
                             'nsfw': post.over_18,
-                            'type': content_type,
-                            'audio_url': audio_url
+                            'type': content_type
                         })
                     elif content_type == 'gallery':
                         images = get_gallery_images(post)
@@ -183,7 +155,6 @@ def scrape():
 
             if not new_results_found:
                 attempts += 1
-                logging.debug(f"No new results found, attempt {attempts}")
             else:
                 attempts = 0
 
@@ -200,7 +171,6 @@ def scrape():
         logging.error(f"An unexpected error occurred: {e}")
         return jsonify({'error': str(e)}), 500
 
-    logging.debug(f"Number of results: {len(results)}")
     return jsonify(results[:desired_results])
 
 if __name__ == '__main__':

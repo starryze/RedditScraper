@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reddit Scraper</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="search-box">
+            <form id="search-form">
+                <input type="text" id="query" name="query" placeholder="Search Reddit">
+                <select id="sort_by" name="sort_by">
+                    <option value="relevance">Relevance</option>
+                    <option value="hot">Hot</option>
+                    <option value="new">New</option>
+                    <option value="top">Top</option>
+                    <option value="comments">Comments</option>
+                </select>
+                <select id="time_filter" name="time_filter">
+                    <option value="all">All Time</option>
+                    <option value="hour">Past Hour</option>
+                    <option value="day">Past 24 Hours</option>
+                    <option value="week">Past Week</option>
+                    <option value="month">Past Month</option>
+                    <option value="year">Past Year</option>
+                </select>
+                <label for="include_nsfw">
+                    <input type="checkbox" id="include_nsfw" name="include_nsfw"> Include NSFW
+                </label>
+                <input type="submit" value="Search">
+            </form>
+        </div>
+        <div id="results" class="results"></div>
+    </div>
+
+    <!-- Navigation for posts -->
+    <div class="post-navigation">
+        <button id="prevPostBtn" class="prev">&#10094; Prev</button>
+        <button id="nextPostBtn" class="next">Next &#10095;</button>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/static/js/script.js"></script>
+</body>
+</html>

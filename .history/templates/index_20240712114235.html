@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reddit Media Scraper</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src= "></script>
+</head>
+<body>
+    <div class="container">
+        <div class="search-box">
+            <form id="search-form">
+                <input type="text" id="query" placeholder="Search Reddit...">
+                <select id="sort_by">
+                    <option value="relevance">Relevance</option>
+                    <option value="new">New</option>
+                    <option value="hot">Hot</option>
+                </select>
+                <select id="time_filter">
+                    <option value="all">All Time</option>
+                    <option value="day">Past Day</option>
+                    <option value="week">Past Week</option>
+                    <option value="month">Past Month</option>
+                    <option value="year">Past Year</option>
+                </select>
+                <label>
+                    <input type="checkbox" id="include_nsfw"> Include NSFW
+                </label>
+                <label>
+                    <input type="checkbox" id="include_images"> Include Images
+                </label>
+                <label>
+                    <input type="checkbox" id="include_videos"> Include Videos
+                </label>
+                <label>
+                    <input type="checkbox" id="include_galleries"> Include Galleries
+                </label>
+                <input type="submit" value="Search">
+            </form>
+        </div>
+        <div class="results" id="results"></div>
+        <div class="post-navigation">
+            <button id="prevPostBtn" class="prev">Previous</button>
+            <button id="nextPostBtn" class="next">Next</button>
+        </div>
+    </div>
+</body>
+</html>
